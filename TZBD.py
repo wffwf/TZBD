@@ -195,12 +195,17 @@ def TZBD():
         msg = MIMEMultipart()
         msg['From'] = EMAIL_CONFIG['SENDER']
         msg['To'] = EMAIL_CONFIG['RECEIVER']
-        msg['Cc'] = EMAIL_CONFIG['CC']
-        
+        # 准备第二个邮件
+        msg_2 = MIMEMultipart()
+        msg_2['From'] = EMAIL_CONFIG_OTHER['SENDER']
+        msg_2['To'] = EMAIL_CONFIG_OTHER['RECEIVER']  
+
         combined_df = pd.concat(all_results) if 'all_results' else pd.DataFrame()
         
         if not combined_df.empty:
             msg['Subject'] = 'IP地址比对异常报告'
+            msg_2['Subject'] = 'IP地址比对异常报告'
+
             html = f"""
             <html>
               <body>
@@ -213,6 +218,8 @@ def TZBD():
             """
         else:
             msg['Subject'] = 'IP地址比对结果'
+            msg_2['Subject'] = 'IP地址比对结果'
+
             html = f"""
             <html>
               <body>
@@ -231,8 +238,10 @@ def TZBD():
             part["Content-Type"] = "application/octet-stream"
             part["Content-Disposition"] = f'attachment; filename="{os.path.basename(timestamp_result_path)}"'
             msg.attach(part)
+            msg_2.attach(part)            
         
         msg.attach(MIMEText(html, 'html'))
+        msg_2.attach(MIMEText(html, 'html'))
 
         # 发送邮件
         try:
@@ -242,6 +251,14 @@ def TZBD():
             print("邮件发送成功")
         except Exception as e:
             print(f"邮件发送失败: {str(e)}")
+        # 发送第二个邮件
+        try:
+            with smtplib.SMTP_SSL(EMAIL_CONFIG_OTHER['SMTP_SERVER'], EMAIL_CONFIG_OTHER['SMTP_PORT']) as server:
+                server.login(EMAIL_CONFIG_OTHER['SENDER'], EMAIL_CONFIG_OTHER['PASSWORD'])
+                server.sendmail(EMAIL_CONFIG_OTHER['SENDER'], EMAIL_CONFIG_OTHER['RECEIVER'], msg.as_string())
+            print("第二个邮件发送成功")
+        except Exception as e:
+            print(f"邮件发送失败: {str(e)}")            
         print(f"\n所有操作已完成，总耗时：{time.time() - start_time:.2f}秒")
     except Exception as e:
         print(f"\n程序执行出错: {str(e)}")
