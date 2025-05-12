@@ -42,6 +42,15 @@ EMAIL_CONFIG = {
     'CC': 'xxxxxx@xxxxxx.com'
 }
 
+# 邮件配置
+EMAIL_CONFIG_OTHER = {
+    'SMTP_SERVER': 'smtp.xxx.com',
+    'SMTP_PORT': 465,
+    'SENDER': 'xxx@xxx.com',
+    'PASSWORD': 'xxxxxxxxxx',
+    'RECEIVER': 'xxxx@xx.com',
+}
+
 # 排除IP配置
 EXCLUDE_IPS = {
     ipaddress.ip_network('x.x.x.0/24', strict=False), 
