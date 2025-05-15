@@ -44,6 +44,7 @@ def process_compare_new(pd_taizhang,pd_4a,pd_4a_host_data,pd_dingji,pd_beian,pd_
     pd_dingji.to_excel(writer, sheet_name='定级备案网站数据', index=False)    
     # pd_ziguan.to_excel(writer, sheet_name='综合资管平台数据', index=False)     # 综合资管安全无需比对 
     pd_4a.to_excel(writer, sheet_name='4A全量资产IP去重', index=False) 
+    pd_4a_host_data.to_excel(writer, sheet_name='4A4A资产类型操作系统信息去重', index=False) 
     pd_beian.to_excel(writer, sheet_name='ICPIP备案自用', index=False)  
     pd_anzi.to_excel(writer, sheet_name='安资自用', index=False)  
     pd_taizhang.to_excel(writer, sheet_name='本地台账', index=False) 
@@ -165,7 +166,18 @@ def process_compare_new(pd_taizhang,pd_4a,pd_4a_host_data,pd_dingji,pd_beian,pd_
     save_comparison_half('4A全量公网', 'ICPIP备案自用', '4A缺失', 'ICPIP备案缺失')  # '4A全量公网' ∈ 'ICPIP备案自用'
     # save_comparison_half('4A全量主机', '安资自用', '4A主机缺失', '安资备案缺失')
 
-    save_comparison_half('四单一致安资平台资产类型操作系统', '四单一致4A资产类型操作系统', '安资平台四单不一致', '4A资产四单不一致')  # '四单一致安资平台资产类型操作系统' ∈  '四单一致4A资产类型操作系统' 
+    # 定义用于四单一致的单向比较方法
+    def save_sidanyizhi_comparison_half(name1, name2, desc1, desc2): # desc1其实没用了，为了好看而已
+        unique1 = sidan_yizhi[name1] - sidan_yizhi[name2]
+        # unique2 = ips[name2] - ips[name1]
+
+        result_df = pd.DataFrame(
+            [[ip, desc2, name1] for ip in unique1],
+            columns=['比对内容', '缺失类型', '来源文件']
+        )
+        all_results.append(result_df)
+        result_df.to_excel(writer, sheet_name=f'{name1}vs{name2}', index=False)
+    save_sidanyizhi_comparison_half('四单一致安资平台资产类型操作系统', '四单一致4A资产类型操作系统', '安资平台四单不一致', '4A资产四单不一致')  # '四单一致安资平台资产类型操作系统' ∈  '四单一致4A资产类型操作系统' 
     # 四单一致当前的计算方式特点，就是分子大于分母，分母是分子的子集，这样可以保证一致率大于等于100% 
 
     # 定义用于定级备案名称的双向比较方法
@@ -268,21 +280,24 @@ def TZBD():
         msg_2.attach(MIMEText(html, 'html'))
 
         # 发送邮件
-        try:
-            with smtplib.SMTP_SSL(EMAIL_CONFIG['SMTP_SERVER'], EMAIL_CONFIG['SMTP_PORT']) as server:
-                server.login(EMAIL_CONFIG['SENDER'], EMAIL_CONFIG['PASSWORD'])
-                server.sendmail(EMAIL_CONFIG['SENDER'], EMAIL_CONFIG['RECEIVER'], msg.as_string())
-            print("邮件发送成功")
-        except Exception as e:
-            print(f"邮件发送失败: {str(e)}")
-        # 发送第二个邮件
-        try:
-            with smtplib.SMTP_SSL(EMAIL_CONFIG_OTHER['SMTP_SERVER'], EMAIL_CONFIG_OTHER['SMTP_PORT']) as server:
-                server.login(EMAIL_CONFIG_OTHER['SENDER'], EMAIL_CONFIG_OTHER['PASSWORD'])
-                server.sendmail(EMAIL_CONFIG_OTHER['SENDER'], EMAIL_CONFIG_OTHER['RECEIVER'], msg.as_string())
-            print("第二个邮件发送成功")
-        except Exception as e:
-            print(f"邮件发送失败: {str(e)}")            
+        if EMAIL_SEND:
+            try:
+                with smtplib.SMTP_SSL(EMAIL_CONFIG['SMTP_SERVER'], EMAIL_CONFIG['SMTP_PORT']) as server:
+                    server.login(EMAIL_CONFIG['SENDER'], EMAIL_CONFIG['PASSWORD'])
+                    server.sendmail(EMAIL_CONFIG['SENDER'], EMAIL_CONFIG['RECEIVER'], msg.as_string())
+                print("邮件发送成功")
+            except Exception as e:
+                print(f"邮件发送失败: {str(e)}")
+            # 发送第二个邮件
+            try:
+                with smtplib.SMTP_SSL(EMAIL_CONFIG_OTHER['SMTP_SERVER'], EMAIL_CONFIG_OTHER['SMTP_PORT']) as server:
+                    server.login(EMAIL_CONFIG_OTHER['SENDER'], EMAIL_CONFIG_OTHER['PASSWORD'])
+                    server.sendmail(EMAIL_CONFIG_OTHER['SENDER'], EMAIL_CONFIG_OTHER['RECEIVER'], msg.as_string())
+                print("第二个邮件发送成功")
+            except Exception as e:
+                print(f"邮件发送失败: {str(e)}")            
+        # 结束发送邮件
+
         print(f"\n所有操作已完成，总耗时：{time.time() - start_time:.2f}秒")
     except Exception as e:
         print(f"\n程序执行出错: {str(e)}")

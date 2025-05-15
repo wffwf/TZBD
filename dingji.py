@@ -17,8 +17,8 @@ proxies = {
     'https': 'http://127.0.0.1:8080'  # 或 'https://...'
 }
 
-PROXY_DEBUG = True
-GET_DETAIL_INFO = True
+PROXY_DEBUG = False
+GET_DETAIL_INFO = False
 
 # ================== 第一部分：定级备案网站数据导出 ==================
 
@@ -75,7 +75,7 @@ def get_jwt_from_user():
     print("5. 复制该值并粘贴到此处")
     # for test
     if PROXY_DEBUG:
-        return "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiMzE1YTRkZGUxMzIxYTRmNWI5M2FhMDJkZjU1YzAwYmYwZDFmOGQyMDYyOTYzM2E4MmU3ZDkxMTI4MGZkMGYwNmM5YjNlMDZmNWQwMjNmNWEiLCJpYXQiOjE3NDcxMTkzMDYuMzg1MDM5LCJuYmYiOjE3NDcxMTkzMDYuMzg1MDQ4LCJleHAiOjE3NDcyMDU3MDYuMjAyOTM5LCJzdWIiOiIzODA1MSIsInNjb3BlcyI6W119.n1jL_D85SFDmMTlhsiiHFoGqInrlCJR9oU0uPUJlOyKoEHFMa_mHTKP2pwuc7WN9f1zi6IHi1iox1cAnXgDGFzHbjTQOqMc7C9YmPUZ10_tYQtN5XB5BZ3p7cnHzE1UB3VKLOeoccN0l3SjiLHgu6gGepaFOPS__xlepH6eCy-idM1wfOEdmES0iKVZeRcF69kU74LgQ9J937Pp7ioyC1nir9z8Yg3aiV3-2_fdjt0L4b_SGh5xtT2dElSyWE4kOMaKLbdFDP2_yWpBUbhnmzJjYDZVS8M5fdA-iM0zpC3GlJSbPEgAjppFtv5Gz3mSPFW0mzs6H1lnBRPqMtot_RwK8qC33jxOn8oq04tLSDnHyLWbMAaetd8IVzRwVZ2p_B-Tm0dFyPcjgTVXmXpyPNGEhfESvQr9AXb2MyBCLQ3ofh1FNGzobZC_HVo2tAg5fKW6qKzRmSWsQzOSUF6TUlBQrOelt-qNvBBJU_Ci0t4Zm0vNhckCJrfBuvcCo9Qci917AsWgy85qH_rXKMfV6irfof26TsJ9g4cEMSwBjrRdiWxa7Vdu_Wo6spjfX6LxDY1IevfD4pDNX8R1-i7kFlnU-gkJXbW_6GdCzOkqj0D4HJ9igmMotqLFZsl8CG7AosXlueB38WczSAQPBmhEWLTSpIBbIYLzcjfDmuQHJ5f0"
+        return "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiY2MzNDc1MWZlNWY0NWYxZWJlNDc4ZTYyOTk4YTA1MTAyN2ZiNjQ1NjllNzFmOWY3Njg0ZmNiMDM0Y2MzYWY4OGM1NmEyODhjMmFmYmUyODkiLCJpYXQiOjE3NDcyNzIwNTYuODkyOTU2LCJuYmYiOjE3NDcyNzIwNTYuODkyOTY0LCJleHAiOjE3NDczNTg0NTYuNzc1ODYzLCJzdWIiOiIzODA1MSIsInNjb3BlcyI6W119.RvxPOUZGuo4LhcPpvjwMdALWdoNXuEQFUFCiGZicHIoGgPJaIRap9JcLhfy3uSMBsr3fCbAMa9clK8gwxT9kW9heXA3W0t7DPf_lTbXzEF8jTLQlndhPbHDExmf6ZgVwhXivG1wve6tgoUmuWvprl8Kttqn1Glqt2mhWkmzpPJvzNcC_ZtCoiYJ8zwbX8Bk2oFE25ZNuc2XTUtVQhPyHe_Y7OVWJypYmYKjemcrLWzn5f2b0x0HYXcahUtSirKf-vMvhMv4Jzsz6rCvwzcWSaGlz_SKi30MRQbAXy2ilIo5IED0mkRADfXAUrExcloh0Zt3EzlRdbWLut3DV2zrS5mv_UdARydnwQvcVOwDYw5k59jGP66FE4lIRGhV70HRysFf07yeY4kA5epxQ_XzRHWwcTVPXUWxp7bbaw2q97zU5MmJUsOt1wx6STt7vR6GfiLga0pJC1jkpyaIBuPpHa56TcRw0sQxk1Z5GNd6PnrlMDKDSfV0P-jkcukG0lXG9T5RyYuMytC0PwOmfcim1meflyXeqWsshGfcXCWfDiSuTWIeVtoBa6L8rO8c1s-KrksmyZeD9w8xvyjrKSWpdB4y-yVSiGT7Ma_bTlvJ-vjcejf56hPGZddKr_og4K7I0UZXSQNN7Kr2aLO6eO332KUvLihzSAUDTkIERrYBHWM4"
     # for test
     jwt = input("请输入JWT值: ").strip()
     if not jwt:
@@ -232,7 +232,8 @@ def export_djba_data():
 
     # 准备获取详细信息，输入result_data和jwt，从result_data中提取id和name进一步获取详细信息
     if GET_DETAIL_INFO:
-        export_djba_operatersystem_detail_by_id(result_data,jwt)
+        for name, details in result_data.items():
+            export_djba_operatersystem_detail_by_id(name,details['id'],jwt)
 
     return merged_df
 
