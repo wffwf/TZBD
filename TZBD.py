@@ -49,26 +49,31 @@ def process_compare_new(pd_taizhang,pd_4a,pd_4a_host_data,pd_dingji,pd_beian,pd_
     pd_taizhang.to_excel(writer, sheet_name='本地台账', index=False) 
     # 准备比对
     ips = {}  # 用于IP比对
-    ip_dingjibeianming_dingjibeiandengji= {}  # 用于定级备案名称比对
+    ip_dingjibeianming_dingjibeiandengji= {}  # 用于定级备案名称、等级的比对
+    sidan_yizhi = {} # 用于4单一致比对，特别说明，地市四单一致目前仅涉及安资和4A@20250515
     # 综合资管安全无需比对
     # ip_ziguan = set(pd_ziguan['IP地址'].dropna().apply(str).apply(lambda x: x.strip()).loc[
     #                    lambda x: ~x.apply(is_excluded)])
     # ips['资管自用'] = ip_ziguan
     # 综合资管安全无需比对
 
+    ###################################################    
+    # 开始对4A系统中的数据准备  
     # 4A地址需要区分内外网
     pd_4a_private, pd_4a_public = split_to_public_private(pd_4a,'资源IP')
     ip_4a_public = set(pd_4a_public['资源IP'].dropna().apply(str).apply(lambda x: x.strip()).loc[
                        lambda x: ~x.apply(is_excluded)])
     ips['4A全量公网']=ip_4a_public    
+    # 获取4A中主机类型为host的IP信息，用于四单一致比较
+    sidan_4a_host = set(pd_4a_host_data['资源IP'].dropna().apply(str).apply(lambda x: x.strip()).loc[
+                       lambda x: ~x.apply(is_excluded)])    
+    sidan_yizhi['四单一致4A资产类型操作系统']= sidan_4a_host
+    # 结束对4A系统中的数据准备
+    ###################################################
 
-    # 测试，想看看4A资产中的主机，有多少录入了安资
-    # pd_4a_host_data.to_excel(writer, sheet_name='4A全量主机去重', index=False)     
-    # ip_4a_host_data = set(pd_4a_host_data['资源IP'].dropna().apply(str).apply(lambda x: x.strip()).loc[
-    #                    lambda x: ~x.apply(is_excluded)])
-    # ips['4A全量主机']=ip_4a_host_data   
-    # 结束测试
-            
+
+    ###################################################    
+    # 开始对定级备案系统中的数据准备  
     ip_dingji = set(pd_dingji['ip_seg'].dropna().apply(str).apply(lambda x: x.strip()).loc[
                        lambda x: ~x.apply(is_excluded)])
     combined_dingji = set(pd_dingji[['ip_seg', '系统名称', 'rankNo']]
@@ -86,11 +91,19 @@ def process_compare_new(pd_taizhang,pd_4a,pd_4a_host_data,pd_dingji,pd_beian,pd_
                           .apply(lambda row: '_'.join(row.astype(str).str.strip()), axis=1))    
     ips['定级备案公网']=ip_dingji_public    
     ip_dingjibeianming_dingjibeiandengji['定级备案名称等级公网']=combined_dingji_public
+    # 结束对定级备案系统中的数据准备  
+    ###################################################
 
+    ###################################################
+    # 开始对ICPIP备案系统中的数据准备  
     ip_beian = set(pd_beian['IP地址'].dropna().apply(str).apply(lambda x: x.strip()).loc[
                        lambda x: ~x.apply(is_excluded)])
     ips['ICPIP备案自用'] = ip_beian
+    # 结束对ICPIP备案系统中的数据准备  
+    ###################################################
 
+    ###################################################
+    # 开始对安资系统中的数据准备  
     ip_anzi = set(pd_anzi['资产IP'].dropna().apply(str).apply(lambda x: x.strip()).loc[
                        lambda x: ~x.apply(is_excluded)])
     ips['安资自用'] = ip_anzi
@@ -98,17 +111,25 @@ def process_compare_new(pd_taizhang,pd_4a,pd_4a_host_data,pd_dingji,pd_beian,pd_
                           .dropna()  # 移除包含缺失值的行
                           .apply(lambda row: '_'.join(row.astype(str).str.strip()), axis=1))
     ip_dingjibeianming_dingjibeiandengji['安资平台定级备案名称等级全量']=combined_anzi
+    sidan_anzi = set(pd_anzi.loc[pd_anzi['资产小类型'] == '操作系统', '资产IP'].dropna().apply(str).apply(lambda x: x.strip()).loc[
+                       lambda x: ~x.apply(is_excluded)])
+    sidan_yizhi['四单一致安资平台资产类型操作系统']= sidan_anzi
+    # 结束对安资系统中的数据准备  
+    ###################################################
 
+    ###################################################
+    # 开始对本地台账中的数据准备  
     ip_taizhang = set(pd_taizhang['IP'].dropna().apply(str).apply(lambda x: x.strip()).loc[
                        lambda x: ~x.apply(is_excluded)])
     ips['本地台账'] = ip_taizhang
     # 本地台账中仅包含了定级备案名称，没有关联定级备案等级，暂时未实现，如果要实现，可以添加一列。但是似乎没有必要
-    # print(ips)
+    # 结束对本地台账中的数据准备  
+    ###################################################
   
     # 执行对比
     all_results = []
 
-    # 定义双向比较方法
+    # 定义双向比较方法，name1相关数据 === name2相关数据
     def save_comparison_full(name1, name2, desc1, desc2):
         unique1 = ips[name1] - ips[name2]
         unique2 = ips[name2] - ips[name1]
@@ -141,8 +162,11 @@ def process_compare_new(pd_taizhang,pd_4a,pd_4a_host_data,pd_dingji,pd_beian,pd_
     save_comparison_full('安资自用', '定级备案全量', '安资缺失', '定级备案缺失')
 
     # 单项比较
-    save_comparison_half('4A全量公网', 'ICPIP备案自用', '4A缺失', 'ICPIP备案缺失')
+    save_comparison_half('4A全量公网', 'ICPIP备案自用', '4A缺失', 'ICPIP备案缺失')  # '4A全量公网' ∈ 'ICPIP备案自用'
     # save_comparison_half('4A全量主机', '安资自用', '4A主机缺失', '安资备案缺失')
+
+    save_comparison_half('四单一致安资平台资产类型操作系统', '四单一致4A资产类型操作系统', '安资平台四单不一致', '4A资产四单不一致')  # '四单一致安资平台资产类型操作系统' ∈  '四单一致4A资产类型操作系统' 
+    # 四单一致当前的计算方式特点，就是分子大于分母，分母是分子的子集，这样可以保证一致率大于等于100% 
 
     # 定义用于定级备案名称的双向比较方法
     def save_dingjibeian_comparison_full(name1, name2, desc1, desc2):
@@ -278,3 +302,4 @@ if __name__ == "__main__":
     # 定级备案和ICPIP备案比较，需要挑选定级备案中的外网地址比对
     # 定级备案和本地台账，修改了台账一条数据，测试成功
     # 定级备案名称和等级，对比了定级备案数据和安资数据，修改了安资平台数据，测试成功，名称和等级的比对没有涉及台账，因为没有等级这列
+    # 四单一致，目前的比较策略：安资平台中资产小类为操作系统的，必须在4A中对应一条host主机信息

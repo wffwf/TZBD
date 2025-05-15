@@ -10,6 +10,16 @@ import json
 from collections import defaultdict
 import os
 
+
+# 设置代理服务器（HTTP 和 HTTPS 可分别设置）
+proxies = {
+    'http': 'http://127.0.0.1:8080',
+    'https': 'http://127.0.0.1:8080'  # 或 'https://...'
+}
+
+PROXY_DEBUG = True
+GET_DETAIL_INFO = True
+
 # ================== 第一部分：定级备案网站数据导出 ==================
 
 def expand_ip_range(ip_str):
@@ -64,17 +74,16 @@ def get_jwt_from_user():
     print("4. 在请求头中找到Authorization字段的值")
     print("5. 复制该值并粘贴到此处")
     # for test
-    # return "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiZjNiMWEzODQyN2I0MjYyMmVlZWJkMzgzZjM3ZjRiZDkyNjVhYzdiMjI2Nzk2MTMzZTVmYTkxMzViNWZlM2VhYzMyYWZjNTc2YjE1NTk5NjkiLCJpYXQiOjE3NDY3NTI3MjAuNjIyMTk2LCJuYmYiOjE3NDY3NTI3MjAuNjIyMjA1LCJleHAiOjE3NDY4MzkxMjAuNTM3ODc5LCJzdWIiOiIzODA1MSIsInNjb3BlcyI6W119.CeG0l5ONDL7o4VjGnRjfwgHFdSY-i7l6O6YSkPYFOaeSHX1rSd3k_1yg_gYf6ntxERfF2H_uW8c72O7J_Xy_aRe1h0FcXKyusNWBDXiS3pJiN8uE7rymdnf1oDHo2-D2CGjAny5Fzcw2zzH4Lq2auqTn8QyeY0RpzKucMb8UTyxbOpB4MnpbMgIdSw8QoRy0JJZhSeUWl-eqZtBxhgobW6eMP0UY9-C7Hu9ehU56Njmx2F0gEiiAOiIdeX-x9u6o-n9vbWg_PVAQDhUB8b77g5DQKvTgfcktIrtfPvxMl6Hkc9g1oQGyz0ieB111JBHTV1kikksFcmCiUZpI5HtYLyYDDrSePGU9I1l_LP-28vecLzx8iJC1LHOagDHCPD5Lq1H2_tKNONkBS8so5mprjw10a9EbmdcHHp6bGBhH_uuoTGBPIu8yEMUMqYc9yPDnwhdbvWga9D7-DAHima-xlvcBtI92w3D1BiVt1FFWVM36y-uLWYurrjqZU2vv3_gOHfGFInJYP2uGov3VAtyjZWoTi5XYXoGtgD4f34wGVy9mst9sIzAvdtXzJOaHYumNvAQmvodaspty28HhwkhCijjGoRaQv2aiWqaNTg0vU51SfDEfVbdwruwsI1YtK0hcQQ3XpjP1a9dIhkrdlEAw3rbrHjFvAECXliHUxw7AISc"
+    if PROXY_DEBUG:
+        return "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiMzE1YTRkZGUxMzIxYTRmNWI5M2FhMDJkZjU1YzAwYmYwZDFmOGQyMDYyOTYzM2E4MmU3ZDkxMTI4MGZkMGYwNmM5YjNlMDZmNWQwMjNmNWEiLCJpYXQiOjE3NDcxMTkzMDYuMzg1MDM5LCJuYmYiOjE3NDcxMTkzMDYuMzg1MDQ4LCJleHAiOjE3NDcyMDU3MDYuMjAyOTM5LCJzdWIiOiIzODA1MSIsInNjb3BlcyI6W119.n1jL_D85SFDmMTlhsiiHFoGqInrlCJR9oU0uPUJlOyKoEHFMa_mHTKP2pwuc7WN9f1zi6IHi1iox1cAnXgDGFzHbjTQOqMc7C9YmPUZ10_tYQtN5XB5BZ3p7cnHzE1UB3VKLOeoccN0l3SjiLHgu6gGepaFOPS__xlepH6eCy-idM1wfOEdmES0iKVZeRcF69kU74LgQ9J937Pp7ioyC1nir9z8Yg3aiV3-2_fdjt0L4b_SGh5xtT2dElSyWE4kOMaKLbdFDP2_yWpBUbhnmzJjYDZVS8M5fdA-iM0zpC3GlJSbPEgAjppFtv5Gz3mSPFW0mzs6H1lnBRPqMtot_RwK8qC33jxOn8oq04tLSDnHyLWbMAaetd8IVzRwVZ2p_B-Tm0dFyPcjgTVXmXpyPNGEhfESvQr9AXb2MyBCLQ3ofh1FNGzobZC_HVo2tAg5fKW6qKzRmSWsQzOSUF6TUlBQrOelt-qNvBBJU_Ci0t4Zm0vNhckCJrfBuvcCo9Qci917AsWgy85qH_rXKMfV6irfof26TsJ9g4cEMSwBjrRdiWxa7Vdu_Wo6spjfX6LxDY1IevfD4pDNX8R1-i7kFlnU-gkJXbW_6GdCzOkqj0D4HJ9igmMotqLFZsl8CG7AosXlueB38WczSAQPBmhEWLTSpIBbIYLzcjfDmuQHJ5f0"
     # for test
     jwt = input("请输入JWT值: ").strip()
     if not jwt:
         print("错误：JWT值不能为空！")
         exit(1)
     return jwt
-
-def export_djba_data():
+def export_djba_data_summary(jwt):
     """导出定级备案数据"""
-    jwt = get_jwt_from_user()
 
     url = "https://www.mii-aqfh.cn/"
     headers = {
@@ -91,7 +100,10 @@ def export_djba_data():
     neteid_proj = {}
     route = "/api/api/common/getNetType"
     try:
-        response = requests.get(url=url + route, headers=headers, timeout=10)
+        if PROXY_DEBUG:
+            response = requests.get(url=url + route, headers=headers, timeout=10, proxies=proxies, verify=False)
+        else:
+            response = requests.get(url=url + route, headers=headers, timeout=10)
         response.raise_for_status()
         res = json.loads(response.text)["data"]
         for r in res:
@@ -115,19 +127,69 @@ def export_djba_data():
                 "updated_at": "", "comment_time_start": "", "comment_time_end": "",
                 "page": i + 1, "public_ip": "", "software_ip": "", "companytype": "3"
             }
-            response = requests.post(url=url + route, headers=headers, json=body, timeout=10)
+            if PROXY_DEBUG:
+                response = requests.post(url=url + route, headers=headers, json=body, timeout=10, proxies=proxies, verify=False)
+            else:
+                response = requests.post(url=url + route, headers=headers, json=body, timeout=10)
             response.raise_for_status()
             res = json.loads(response.text)["data"]["data"]
             for item in res:
+                
                 result_data[item["name"]] = {
+                    "id": item.get("id"),
                     "software_ip": item.get("software_ip"),
                     "public_ip": item.get("public_ip"),
                     "rankNo": item.get("rankNo"),
                     "net_type": neteid_proj.get(item["nete_id"], "未知网络类型")
                 }
+                # print(result_data[item["name"]])
         except Exception as e:
             print(f"获取第{i + 1}页数据时出错: {str(e)}")
             continue
+    return   result_data  
+
+def export_djba_operatersystem_detail_by_id(name,id,jwt):
+    """导出定级备案数据"""
+    url = "https://www.mii-aqfh.cn"
+    headers = {
+        "Authorization": jwt,
+        "Origin": "https://www.mii-aqfh.cn",
+        "Referer": "https://www.mii-aqfh.cn/gradingFiling?company_type=3",
+        "X-Requested-With": "XMLHttpRequest",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0",
+        "Content-Type": "application/json;charset=utf-8",
+        "Te": "trailers"
+    }
+    # 获取某定级备案详细信息
+    neteid_proj = {}
+    route = "/api/api/getAssets"
+    try:
+        body = {
+            "id": str(id), "companytype": "3","getType":3,"page":1
+        }
+        if PROXY_DEBUG:
+            response = requests.post(url=url + route, headers=headers, json=body, timeout=10, proxies=proxies, verify=False)
+        else:
+            response = requests.post(url=url + route, headers=headers, json=body, timeout=10)
+        response.raise_for_status()
+        res = json.loads(response.text)
+        data = res['data']['basesoft']
+        df = pd.json_normalize(data)
+        df.to_excel(f'{name}.xlsx', index=False)  # 搞到这里了，先看看导出结果什么样子，如何结合4单一致
+    except Exception as e:
+        print(f"获取{name}详细信息时出错: {str(e)}")
+        exit(0)
+    
+def export_djba_data_detail(result_data,jwt):
+    # 遍历列表中的每个字典
+    dingjibeian_systems={}
+    for name, details in result_data.items():
+        dingjibeian_systems[name]=details['id']
+        export_djba_data_detail_by_id(name,details['id'],jwt)
+    
+def export_djba_data():
+    jwt = get_jwt_from_user()    
+    result_data = export_djba_data_summary(jwt)
 
     # 准备合并后的数据
     ip_info = defaultdict(lambda: {
@@ -154,7 +216,7 @@ def export_djba_data():
             ip_info[ip]['net_types'].add(details["net_type"])
             ip_info[ip]['rankNos'].add(details["rankNo"])
 
-    # 构建最终DataFrame
+    # 构建概要信息DataFrame
     merged_data = []
     for ip, info in ip_info.items():
         merged_data.append({
@@ -167,6 +229,11 @@ def export_djba_data():
 
     # 创建DataFrame并按IP排序
     merged_df = pd.DataFrame(merged_data).sort_values('ip_seg')
+
+    # 准备获取详细信息，输入result_data和jwt，从result_data中提取id和name进一步获取详细信息
+    if GET_DETAIL_INFO:
+        export_djba_operatersystem_detail_by_id(result_data,jwt)
+
     return merged_df
 
 
@@ -206,6 +273,18 @@ def read_from_web(step,total,current_time):
     merged_df = get_DingJi_from_web(step,total,current_time)
     return(merged_df)
     
+
+
+def get_DingJi(step,total,current_time):
+    return get_DingJi_from_web(step,total,current_time)
+
+# ------------------------- 测试main函数 -------------------------
+if __name__ == "__main__":
+    current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")    
+    merged_df = read_from_web(2,4,current_time)
+    # read_from_file()
+    print(merged_df) 
+    exit(0)
     # 保存到Excel文件
     output_file = f"定级备案网站数据_{current_time}.xlsx"    
     try:
@@ -215,16 +294,5 @@ def read_from_web(step,total,current_time):
             if len(merged_df) == 0:
                 pd.DataFrame({'提示': ['没有找到定级备案数据']}).to_excel(writer, sheet_name="无数据", index=False)
         print(f"定级备案数据已成功保存到 {output_file}")
-        return output_file
     except Exception as e:
         print(f"保存Excel文件时出错: {str(e)}")
-        return None    
-
-def get_DingJi(step,total,current_time):
-    return get_DingJi_from_web(step,total,current_time)
-
-# ------------------------- 测试main函数 -------------------------
-if __name__ == "__main__":
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")    
-    read_from_web(2,4,timestamp)
-    # read_from_file()
