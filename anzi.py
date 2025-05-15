@@ -12,9 +12,9 @@ def fenxi_AnZi(step,total,current_time):
     filename = FILE_PATHS['input']['安资平台']
     df_asset = pd.read_excel(filename, sheet_name='资产填报')
     # 准备安资数据
-    result = df_asset.iloc[:, [1, 16, 17, 18]]
+    result = df_asset.iloc[:, [1, 6, 16, 17, 18]]
 	# 重新指定列名
-    new_column_names = ['资产IP', '定级对象名称', '资产所属系统的定级备案等级', '网络单元类型名称']
+    new_column_names = ['资产IP', '资产小类型', '定级对象名称', '资产所属系统的定级备案等级', '网络单元类型名称']
     result.columns = new_column_names
 
     # 定义替换映射
