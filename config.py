@@ -6,7 +6,9 @@ import ipaddress
 def print_progress(step, total, message):
     """打印带进度标识的状态信息"""
     print(f"[{step}/{total}] {message}")
-
+# ========================= 调试模块 =========================
+PROXY_DEBUG = False
+EMAIL_SEND = True
 # ========================= 全局配置 =========================
 # 文件路径配置
 FILE_PATHS = {
